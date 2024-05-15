@@ -16,11 +16,6 @@ setwd('/Lustre02/zhangJM/01.Project/14.Chicken.Broiler.vs.Layer.study/snRNA.anal
 
 pbmcnewer<-readRDS('merge_processed.anchor.for.rmbatch.rename.rds')
 
-counts <- GetAssayData(object = pbmcnewer, slot = "counts")
-
-pbmcnewer <- CreateSeuratObject(counts, meta.data = pbmcnewer@meta.data)
-
-
 
 pbmc<-pbmcnewer
 
@@ -38,21 +33,21 @@ cds <- estimateSizeFactors(cds)
 cds <- estimateDispersions(cds)
 
 bm280k<-pbmcnewer
-bm280k <- NormalizeData(bm280k, normalization.method = "LogNormalize", scale.factor = 10000)
-bm280k <- FindVariableFeatures(bm280k, selection.method = "vst", nfeatures = 2000)
-all.genes <- rownames(bm280k)
-bm280k <- ScaleData(bm280k, features = all.genes)
-bm280k <- RunPCA(bm280k,npcs = 50, verbose = FALSE)
+# bm280k <- NormalizeData(bm280k, normalization.method = "LogNormalize", scale.factor = 10000)
+# bm280k <- FindVariableFeatures(bm280k, selection.method = "vst", nfeatures = 2000)
+# all.genes <- rownames(bm280k)
+# bm280k <- ScaleData(bm280k, features = all.genes)
+# bm280k <- RunPCA(bm280k,npcs = 50, verbose = FALSE)
 
-bm280k.integrated<-RunHarmony(bm280k,group.by.vars = 'orig.ident',max.iter.harmony=30,lambda=2)
-bm280k.integrated <- RunUMAP(bm280k.integrated, reduction = "harmony", dims = 1:30)
+# bm280k.integrated<-RunHarmony(bm280k,group.by.vars = 'orig.ident',max.iter.harmony=30,lambda=2)
+# bm280k.integrated <- RunUMAP(bm280k.integrated, reduction = "harmony", dims = 1:30)
 
-p1<-DimPlot(bm280k, reduction = "umap", group.by="integrated_merge_cluster",pt.size = 0.6,label = TRUE, repel = TRUE)
-oup<-paste('UMAP.for.integrated_merge_cluster.new.for.monocle.pdf',sep='')
-ggsave(oup, plot=p1, width = 8, height =8)
+# p1<-DimPlot(bm280k, reduction = "umap", group.by="integrated_merge_cluster",pt.size = 0.6,label = TRUE, repel = TRUE)
+# oup<-paste('UMAP.for.integrated_merge_cluster.new.for.monocle.pdf',sep='')
+# ggsave(oup, plot=p1, width = 8, height =8)
 
 
-deg.cluster <- FindAllMarkers(bm280k,assay='RNA',group.by='seurat_clusters')
+deg.cluster <- FindAllMarkers(bm280k,assay='RNA',group.by='integrated_merge_cluster')
 write.table(deg.cluster,file=paste('all.cluster.DEgenes.new.txt',sep=''),sep='\t',quote=F,row.names=T,col.names=T)
 
 diff.genes <- subset(deg.cluster,p_val_adj<0.05)$gene
@@ -73,6 +68,3 @@ ggsave(paste('monocle.State.UMAP.pdf',sep=""),limitsize=F, plot=p1, width = 8, h
 
 
 saveRDS(cds, file = "subcluster.anchor.for.monocle.new.rds")
-
-
-
